@@ -1,7 +1,6 @@
 # Create your views here.
 from dataclasses import dataclass
 from re import M
-from tkinter.messagebox import NO
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import UserID, Chat
