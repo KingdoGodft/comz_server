@@ -132,7 +132,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-helpcomzvenv/
 
 # Spyder project settings
 .spyderproject
