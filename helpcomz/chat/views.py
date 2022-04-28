@@ -2,10 +2,11 @@
 from dataclasses import dataclass
 from re import M
 import os
+from venv import create
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import UserID, Chat
-from .serializers import UserIDSerializer, ChatSerializer
+from .serializers import UserIDSerializer, ChatSerializer, PCPartsSerializer
 from rest_framework import status
 import string
 import random
@@ -68,12 +69,12 @@ class ChatView(APIView):
             chat_serializer = ChatSerializer(Chat.objects.filter(user_id=user_id), many=True)
             return Response(chat_serializer.data, status=status.HTTP_201_CREATED)
             # 생성된 
-            # return Response(chat_serializer.data, status = status.HTTP_201_CREATED)
+            return Response(chat_serializer.data, status = status.HTTP_201_CREATED)
         else:
             return Response(chat_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     """
-    create response and insert it to DB
+    create answer response and insert it to DB
     parameter:
         data: ChatSerializer
     """
@@ -85,12 +86,21 @@ class ChatView(APIView):
         # dialogflow로 답변 생성
         project_id = "comz-chat"
         session_id = "user_id"
-        fulfillment_text = self.detect_intent_texts(project_id, session_id, [content], "ko-KR")
+        
+        dialogflow_response =  self.detect_intent_texts(project_id, session_id, [content], "ko-KR")
+
+        fulfillment_text = dialogflow_response.query_result.fulfillment_text
+        is_finished = dialogflow_response.query_result.all_required_params_present
+        
+        # 챗봇에서 모든 정보가 수집되었을 경우 답변 형식을 parts로 지정
+        chat_type = "answer"
+        if is_finished:
+            chat_type = "parts"
 
         # 답변 생성
         response_data = {
             "user_id": user_id,
-            "chat_type":"answer",
+            "chat_type":chat_type,
             "content" : fulfillment_text,
         }
 
@@ -101,6 +111,10 @@ class ChatView(APIView):
             pass
         else:
             print(response_chat_serializer.errors)
+
+        # 모든 정보가 수집되었을 경우 PC 부품 리스트 생성
+        if is_finished:
+            self.create_parts(response_chat_serializer.data)
             
     """
     google cloud api tutorial for dialogflow 
@@ -137,4 +151,75 @@ class ChatView(APIView):
             )
             print("Fulfillment text: {}\n".format(response.query_result.fulfillment_text))
 
-            return response.query_result.fulfillment_text
+            return response
+
+    '''
+    create parts response and insert it to DB
+    parameter:
+        data: ChatSerializer
+    '''
+    def create_parts(self, chat_data):
+        # chat_data에서 chat_id 가져옴
+        chat_id = chat_data.get("id")
+
+        # 부품 더미데이터
+        pc_parts_info = [
+            {
+            "part_type" : "cpu",
+            "part_name" : "인텔 코어i7-12세대 12700K (엘더레이크)",
+            "price" : "533960",
+            "shop_link" : "http://prod.danawa.com/info/?pcode=15594638&cate=112747",
+            "thumbnail" : "http://img.danawa.com/prod_img/500000/638/594/img/15594638_1.jpg?shrink=130:130",
+            },
+            {
+            "part_type" : "gpu",
+            "part_name" : "갤럭시 GALAX 지포스 RTX 3060 V2 D6 12GB ",
+            "price" : "539720",
+            "shop_link" : "http://prod.danawa.com/info/?pcode=14448719&cate=112753",
+            "thumbnail" : "http://img.danawa.com/prod_img/500000/719/448/img/14448719_1.jpg?shrink=130:130",
+            },
+            {
+            "part_type" : "mainboard",
+            "part_name" : "ASUS PRIME B660M-K D4 인텍앤컴퍼니",
+            "price" : "159510",
+            "shop_link" : "http://prod.danawa.com/info/?pcode=16084070&cate=11341244",
+            "thumbnail" : "http://img.danawa.com/prod_img/500000/070/084/img/16084070_1.jpg?shrink=130:130",
+            },
+            {
+            "part_type" : "ram",
+            "part_name" : "삼성전자 DDR4-3200",
+            "price" : "147080",
+            "shop_link" : "http://prod.danawa.com/info/?pcode=11541857&cate=112752",
+            "thumbnail" : "http://img.danawa.com/prod_img/500000/857/541/img/11541857_1.jpg?shrink=130:130&_v=20211119130530",
+            },
+            {
+            "part_type" : "powersupply",
+            "part_name" : "마이크로닉스 Classic II 풀체인지 600W 80PLUS 230V EU",
+            "price" : "57000",
+            "shop_link" : "http://prod.danawa.com/info/?pcode=14677028&cate=112777",
+            "thumbnail" : "http://img.danawa.com/prod_img/500000/028/677/img/14677028_1.jpg?shrink=130:130",
+            },
+            {
+            "part_type" : "disk",
+            "part_name" : "Seagate 파이어쿠다 530 M.2 NVMe (1TB)",
+            "price" : "229000",
+            "shop_link" : "http://prod.danawa.com/info/?pcode=14803520&cate=112760#",
+            "thumbnail" : "http://img.danawa.com/prod_img/500000/520/803/img/14803520_1.jpg?shrink=130:130",
+            },
+            {
+            "part_type" : "case",
+            "part_name" : "앱코 NCORE G30 트루포스 (블랙)",
+            "price" : "38900",
+            "shop_link" : "http://prod.danawa.com/info/?pcode=14705840&cate=112775",
+            "thumbnail" : "http://img.danawa.com/prod_img/500000/840/705/img/14705840_1.jpg?shrink=130:130",
+            },
+        ]
+
+        # PC 부품 정보 입력
+        for pc_part_info in pc_parts_info:
+            pc_part_info['chat_id'] = chat_id
+            pc_part_serializer = PCPartsSerializer(data = pc_part_info)
+            if(pc_part_serializer.is_valid()):
+                pc_part_serializer.save()
+            else:
+                print(pc_part_serializer.errors)
