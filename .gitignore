@@ -5,6 +5,7 @@
 ## private secrets
 comz-chat-*.json
 test.test
+helpcomz/db.sqlite3
 
 ### Django ###
 *.log
