@@ -66,7 +66,7 @@ class ChatView(APIView):
             response_count = self.create_answer(chat_serializer.data)
             # 생성된 응답 리턴
             user_id = chat_serializer.data.get("user_id")
-            chat_queryset = Chat.objects.filter(user_id=user_id).order_by('id')[:response_count]
+            chat_queryset = Chat.objects.filter(user_id=user_id).order_by('-id')[:response_count][::-1]
             chat_serializer = ChatSerializer(chat_queryset, many=True)
             return Response(chat_serializer.data, status=status.HTTP_201_CREATED)
         else:
