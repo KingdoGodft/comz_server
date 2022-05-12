@@ -63,13 +63,12 @@ class ChatView(APIView):
             # DB에 저장
             chat_serializer.save() 
             # 응답 생성 및 DB 저장
-            self.create_answer(chat_serializer.data)
-            # 지금까지 사용자가 입력했던 질문/응답 전체 리턴
+            response_count = self.create_answer(chat_serializer.data)
+            # 생성된 응답 리턴
             user_id = chat_serializer.data.get("user_id")
-            chat_serializer = ChatSerializer(Chat.objects.filter(user_id=user_id), many=True)
+            chat_queryset = Chat.objects.filter(user_id=user_id).order_by('-id')[:response_count]
+            chat_serializer = ChatSerializer(chat_queryset, many=True)
             return Response(chat_serializer.data, status=status.HTTP_201_CREATED)
-            # 생성된 
-            return Response(chat_serializer.data, status = status.HTTP_201_CREATED)
         else:
             return Response(chat_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -89,32 +88,43 @@ class ChatView(APIView):
         
         dialogflow_response =  self.detect_intent_texts(project_id, session_id, [content], "ko-KR")
 
-        fulfillment_text = dialogflow_response.query_result.fulfillment_text
+        #fulfillment_text = dialogflow_response.query_result.fulfillment_text
+        fulfillment_messages = dialogflow_response.query_result.fulfillment_messages
         is_finished = dialogflow_response.query_result.all_required_params_present
+
+        # 리턴되는 메시지 리스트 각각에 대해 답변 생성
+        for idx, text in enumerate(fulfillment_messages):
+            answer_text = text.text.text[0]
+            
+            # 마지막 답변 (사용자에게 재시작을 묻는 경우) 확인
+            is_last_answer = is_finished and idx == len(fulfillment_messages) -1
+            
+            # 챗봇에서 모든 정보가 수집되었을 경우 마지막 답변 형식을 parts로 지정
+            chat_type = "answer"
+            if is_last_answer:
+                chat_type = "parts"
+
+            # 답변 생성
+            response_data = {
+                "user_id": user_id,
+                "chat_type":chat_type,
+                "content" : answer_text,
+            }
+
+            # 답변 DB에 저장
+            response_chat_serializer = ChatSerializer(data = response_data)
+            if response_chat_serializer.is_valid():
+                response_chat_serializer.save() 
+                pass
+            else:
+                print(response_chat_serializer.errors)
+
+            # 모든 정보가 수집되었을 경우 PC 부품 리스트 생성
+            if is_last_answer:
+                self.create_parts(response_chat_serializer.data)
         
-        # 챗봇에서 모든 정보가 수집되었을 경우 답변 형식을 parts로 지정
-        chat_type = "answer"
-        if is_finished:
-            chat_type = "parts"
-
-        # 답변 생성
-        response_data = {
-            "user_id": user_id,
-            "chat_type":chat_type,
-            "content" : fulfillment_text,
-        }
-
-        # 답변 DB에 저장
-        response_chat_serializer = ChatSerializer(data = response_data)
-        if response_chat_serializer.is_valid():
-            response_chat_serializer.save() 
-            pass
-        else:
-            print(response_chat_serializer.errors)
-
-        # 모든 정보가 수집되었을 경우 PC 부품 리스트 생성
-        if is_finished:
-            self.create_parts(response_chat_serializer.data)
+        # 총 답변 개수 리턴
+        return len(fulfillment_messages)
             
     """
     google cloud api tutorial for dialogflow 
@@ -150,6 +160,7 @@ class ChatView(APIView):
                 )
             )
             print("Fulfillment text: {}\n".format(response.query_result.fulfillment_text))
+            #print("fulfillment_messages: {}\n".format(response.query_result.fulfillment_messages))
 
             return response
 
