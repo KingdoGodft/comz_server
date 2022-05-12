@@ -91,13 +91,15 @@ class ChatView(APIView):
         #fulfillment_text = dialogflow_response.query_result.fulfillment_text
         fulfillment_messages = dialogflow_response.query_result.fulfillment_messages
         is_finished = dialogflow_response.query_result.all_required_params_present
+        is_correct_intent = dialogflow_response.query_result.intent.display_name == "ask_pc_game"
+        print ( dialogflow_response)
 
         # 리턴되는 메시지 리스트 각각에 대해 답변 생성
         for idx, text in enumerate(fulfillment_messages):
             answer_text = text.text.text[0]
             
             # 마지막 답변 (사용자에게 재시작을 묻는 경우) 확인
-            is_last_answer = is_finished and idx == len(fulfillment_messages) -1
+            is_last_answer = is_finished and idx == len(fulfillment_messages) -1  and is_correct_intent
             
             # 챗봇에서 모든 정보가 수집되었을 경우 마지막 답변 형식을 parts로 지정
             chat_type = "answer"
