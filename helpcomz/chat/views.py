@@ -88,18 +88,26 @@ class ChatView(APIView):
         
         dialogflow_response =  self.detect_intent_texts(project_id, session_id, [content], "ko-KR")
 
-        #fulfillment_text = dialogflow_response.query_result.fulfillment_text
+
+        
         fulfillment_messages = dialogflow_response.query_result.fulfillment_messages
         is_finished = dialogflow_response.query_result.all_required_params_present
-        is_correct_intent = dialogflow_response.query_result.intent.display_name == "ask_pc_game"
-        print ( dialogflow_response)
+        is_intent_ask_pc = dialogflow_response.query_result.intent.display_name == "ask_pc_game"
+        output_contexts =  dialogflow_response.query_result.parameters
+
+        # https://stackoverflow.com/questions/71256960/how-to-access-infos-in-protobuf-response-from-dialogflow-api
+        # cannot extract parameters directly. convert it to json
+        from google.protobuf.json_format import MessageToDict
+        dialogflow_response_dict = MessageToDict(dialogflow_response._pb)
+        if is_intent_ask_pc:
+            parameters =  dialogflow_response_dict['queryResult']['parameters']
 
         # 리턴되는 메시지 리스트 각각에 대해 답변 생성
         for idx, text in enumerate(fulfillment_messages):
             answer_text = text.text.text[0]
             
             # 마지막 답변 (사용자에게 재시작을 묻는 경우) 확인
-            is_last_answer = is_finished and idx == len(fulfillment_messages) -1  and is_correct_intent
+            is_last_answer = is_finished and idx == len(fulfillment_messages) -1  and is_intent_ask_pc
             
             # 챗봇에서 모든 정보가 수집되었을 경우 마지막 답변 형식을 parts로 지정
             chat_type = "answer"
@@ -111,9 +119,10 @@ class ChatView(APIView):
                 "user_id": user_id,
                 "chat_type":chat_type,
                 "content" : answer_text,
+                "parameters" : parameters
             }
 
-            # 답변 DB에 저장
+            # 답변 저장
             response_chat_serializer = ChatSerializer(data = response_data)
             if response_chat_serializer.is_valid():
                 response_chat_serializer.save() 
@@ -129,7 +138,7 @@ class ChatView(APIView):
         return len(fulfillment_messages)
             
     """
-    google cloud api tutorial for dialogflow 
+    google cloud api for dialogflow 
     https://cloud.google.com/dialogflow/es/docs/quick/api#detect-intent-text-drest
     """
     def detect_intent_texts(self, project_id, session_id, texts, language_code):
@@ -161,7 +170,7 @@ class ChatView(APIView):
                     response.query_result.intent_detection_confidence,
                 )
             )
-            print("Fulfillment text: {}\n".format(response.query_result.fulfillment_text))
+            #print("Fulfillment text: {}\n".format(response.query_result.fulfillment_text))
             #print("fulfillment_messages: {}\n".format(response.query_result.fulfillment_messages))
 
             return response

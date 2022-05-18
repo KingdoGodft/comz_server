@@ -1,4 +1,5 @@
 # Create your models here.
+from email.policy import default
 from pyexpat import model
 from ssl import Purpose
 from statistics import mode
@@ -17,6 +18,8 @@ class Chat(models.Model):
     chat_type = models.CharField(max_length=10, auto_created=True, default="question")
     "content"
     content = models.TextField()
+    "parameters"
+    parameters = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return '{},{},{},{}'.format(self.user_id, self.chat_type, self.content, self.created_at)
