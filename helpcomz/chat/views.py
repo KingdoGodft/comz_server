@@ -101,6 +101,8 @@ class ChatView(APIView):
         dialogflow_response_dict = MessageToDict(dialogflow_response._pb)
         if is_intent_ask_pc:
             parameters =  dialogflow_response_dict['queryResult']['parameters']
+        else:
+            parameters = {}
 
         # 리턴되는 메시지 리스트 각각에 대해 답변 생성
         for idx, text in enumerate(fulfillment_messages):
