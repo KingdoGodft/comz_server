@@ -8,8 +8,6 @@ from rest_framework.response import Response
 from .models import UserID, Chat
 from .serializers import UserIDSerializer, ChatSerializer, PCPartsSerializer
 from rest_framework import status
-
-from algorithm import algorithm
 import string
 import random
 
