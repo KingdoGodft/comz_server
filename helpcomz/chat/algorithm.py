@@ -135,6 +135,7 @@ class algorithm:
         for row in pw:
             if int(row["capacity"]) >= tdp:
                 if mintdp > int(row["capacity"]):
+                    mintdp = int(row["capacity"])
                     minRow = row
 
         if minRow is None:
