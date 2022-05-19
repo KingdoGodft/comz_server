@@ -2,6 +2,9 @@
 from dataclasses import dataclass
 from re import M
 import os
+import sys 
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
 from venv import create
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -9,8 +12,9 @@ from .models import UserID, Chat
 from .serializers import UserIDSerializer, ChatSerializer, PCPartsSerializer
 from rest_framework import status
 import string
-import random
-import algorithm
+from algorithm import algorithm
+
+
 
 
 
