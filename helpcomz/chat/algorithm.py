@@ -15,14 +15,14 @@ class algorithm:
 
     def __init__(self):
         logger.debug(os.getcwd())
-        self.cpu = CsvManager("../resource/cpu.csv")
-        self.gpu = CsvManager("../resource/gpu.csv")
-        self.case = CsvManager("../resource/case.csv")
-        self.ram = CsvManager("../resource/ram.csv")
-        self.power = CsvManager("../resource/power.csv")
-        self.ssd = CsvManager("../resource/ssd.csv")
-        self.mb = CsvManager("../resource/mb.csv")
-        self.FPS_DATA = CsvManager("../resource/FPS_DATA.csv")
+        self.cpu = CsvManager("./resource/cpu.csv")
+        self.gpu = CsvManager("./resource/gpu.csv")
+        self.case = CsvManager("./resource/case.csv")
+        self.ram = CsvManager("./resource/ram.csv")
+        self.power = CsvManager("./resource/power.csv")
+        self.ssd = CsvManager("./resource/ssd.csv")
+        self.mb = CsvManager("./resource/mb.csv")
+        self.FPS_DATA = CsvManager("./resource/FPS_DATA.csv")
         self.gameMap = {
 
         }

@@ -8,6 +8,8 @@ import pandas
 import re
 import codecs
 from collections import namedtuple
+import logging
+logger = logging.getLogger("sex")
 
 class KeywordCsvData:
     def __init__(self, keyword, rank):
@@ -147,6 +149,8 @@ class TestClass3():
 class CsvManager:
     def __init__(self, file):
         self.file = file
+        logger.debug(os.getcwd())
+
         self.data = pandas.read_csv(file,error_bad_lines=False)
         # print(self.data)
         # print(self.data)
