@@ -107,7 +107,7 @@ class algorithm:
         ramData["part_name"] = ram["model"]
         ramData["shop_link"] = ram["link"]
 
-        return ram
+        return ramData
 
     def getMBBySocket(self,socket):
         d = self.generateForm()
