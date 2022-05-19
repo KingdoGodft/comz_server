@@ -70,7 +70,7 @@ class algorithm:
         ssdData["part_type"] = "disk"
 
 
-        ssd = self.ssd.data.iloc[0:1]
+        ssd = self.ssd.consumeRow(consume=False, consumeAll=True)[0]
 
         ssdData["price"] = int(ssd["price"])
         ssdData["thumbnail"] = ssd["thumbnail"]
@@ -83,7 +83,9 @@ class algorithm:
         caseData = self.generateForm()
         caseData["part_type"] = "case"
 
-        case = self.case.data.iloc[0:1]
+        # case = self.case.data.iloc[0:1]
+        case = self.case.consumeRow(consume=False, consumeAll=True)[0]
+
 
         caseData["price"] = int(case["price"])
         caseData["thumbnail"] = case["thumbnail"]
@@ -96,7 +98,9 @@ class algorithm:
         ramData = self.generateForm()
         ramData["part_type"] = "ram"
 
-        ram = self.case.data.iloc[0:1]
+        ram = self.ram.consumeRow(consume=False, consumeAll=True)[0]
+
+        # ram = self.ram.data.iloc[0:1]
 
         ramData["price"] = int(ram["price"])
         ramData["thumbnail"] = ram["thumbnail"]
@@ -172,7 +176,6 @@ class algorithm:
 
 
             for idx, cpugpu in cpugpuList.iterrows():
-                print("cpugpu ",cpugpu)
                 cpu=cpugpu["CPU NAME"]
                 gpu=cpugpu["GPU NAME"]
                 frame=cpugpu["GAME AVG FRAME"]
