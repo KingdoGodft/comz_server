@@ -192,9 +192,7 @@ class algorithm:
 
                 tempBudget = currCpu["price"]+currGpu["price"]+currMb["price"]+currPw["price"]
 
-                print("budget test ",self.currBudget,tempBudget, budget)
                 if (self.currBudget+tempBudget)/10000 > budget :
-                    print("BUDGET EXCEED")
                     continue
 
                 #continue 안 할 경우 넣어도 되는 부품 조합임 .
