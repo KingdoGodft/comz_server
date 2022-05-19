@@ -251,7 +251,7 @@ class ChatView(APIView):
             ]
         else:
             print("Computer is not None")
-            print(computer)
+            print(computer["data"])
             pc_parts_info = computer["data"]
 
         # PC 부품 정보 입력
