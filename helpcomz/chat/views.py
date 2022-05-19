@@ -10,7 +10,7 @@ from .serializers import UserIDSerializer, ChatSerializer, PCPartsSerializer
 from rest_framework import status
 import string
 import random
-from .algorithm import algorithm
+# from .algorithm import algorithm
 
 
 
