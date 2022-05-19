@@ -310,7 +310,3 @@ class algorithm:
 
         returnList = pd.DataFrame(temp_data)[["CPU NAME","GPU NAME","GAME AVG FRAME"]]
         return returnList
-
-alg = algorithm()
-
-print( alg.run("222만원",["사이버펑크2077"],"상옵") )
