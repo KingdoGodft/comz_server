@@ -255,6 +255,17 @@ class ChatView(APIView):
             print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
             pc_parts_info = computer["data"]
 
+            #computer에 들어가는 데이터는 아래처럼 생겨먹음 
+                #     return {
+                #    "data" : self.returnData,
+                #    "option" : option,
+                #    "frame" : selected["frame"],
+                #    "totalPrice" : self.currBudget
+                # }
+
+            # for pc_part_info in pc_parts_info:
+            #     pc_part_info['totalPrice']
+            
         # PC 부품 정보 입력
         for pc_part_info in pc_parts_info:
             pc_part_info['chat_id'] = chat_id
