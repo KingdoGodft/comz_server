@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import os
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -132,3 +133,24 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = False
+
+
+
+
+
+
+
+LOG_FILE = os.path.join(os.path.dirname(__file__), '..', 'myLog.log')
+
+
+LOGGING = { 'version': 1, 
+'disable_existing_loggers': False,
+ 'formatters': { 'verbose': { 'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s", 'datefmt' : "%d/%b/%Y %H:%M:%S" }, 
+ 'simple': { 'format': '%(levelname)s %(message)s' }, }, 
+ 'handlers': { 'file': { 'level': 'DEBUG', 'class': 'logging.handlers.RotatingFileHandler', 
+ 'filename': LOG_FILE, 'formatter': 'verbose', 'maxBytes':1024*1024*10, 'backupCount':5, }, },
+  'loggers': { 'django': { 'handlers':['file'], 'propagate': True, 'level':'INFO', }, 
+  'django.request': { 'handlers':['file'], 'propagate': False, 'level':'INFO', }, 
+  'myAppName': { 'handlers': ['file'], 'level': 'DEBUG', }, 
+  } }
+
