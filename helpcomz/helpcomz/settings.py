@@ -151,6 +151,6 @@ LOGGING = { 'version': 1,
  'filename': LOG_FILE, 'formatter': 'verbose', 'maxBytes':1024*1024*10, 'backupCount':5, }, },
   'loggers': { 'django': { 'handlers':['file'], 'propagate': True, 'level':'INFO', }, 
   'django.request': { 'handlers':['file'], 'propagate': False, 'level':'INFO', }, 
-  'myAppName': { 'handlers': ['file'], 'level': 'DEBUG', }, 
+  'sex': { 'handlers': ['file'], 'level': 'DEBUG', }, 
   } }
 

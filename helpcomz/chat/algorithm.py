@@ -6,15 +6,15 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import pandas as pd
 from .csvManager import CsvManager
 from operator import itemgetter
-
-
+import logging
+logger = logging.getLogger("sex")
 class algorithm:
 
     
     
 
     def __init__(self):
-        print(os.getcwd())
+        logger.debug(os.getcwd())
         self.cpu = CsvManager("../resource/cpu.csv")
         self.gpu = CsvManager("../resource/gpu.csv")
         self.case = CsvManager("../resource/case.csv")
