@@ -130,6 +130,18 @@ class algorithm:
         pw = self.power.data[self.power.data["capacity"] >= tdp]
         pw = pd.DataFrame(pw).sort_values(by="capacity",ascending=True).iloc[0:1] #파워 용량 가장 작은 것 선택!
 
+        print("@!@!@!@@@@@@@@@@@@@@@@@")
+        print(pw)
+
+        print("###################")
+        print(pw["price"])
+        print(pw["thumbnail"])
+        print(pw["model"])
+        print(pw["link"])
+        print("###################")
+        print("###################")
+
+        
         d["price"] = int(pw["price"])
         d["thumbnail"] = pw["thumbnail"]
         d["part_name"] = pw["model"]
