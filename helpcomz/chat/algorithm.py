@@ -90,13 +90,13 @@ class algorithm:
         caseData["part_name"] = case["model"]
         caseData["shop_link"] = case["link"]
 
-        return case
+        return caseData
 
     def chooseRam(self):
         ramData = self.generateForm()
         ramData["part_type"] = "ram"
 
-        ram = self.ram.data[0]
+        ram = self.case.data.iloc[0:1]
 
         ramData["price"] = int(ram["price"])
         ramData["thumbnail"] = ram["thumbnail"]
@@ -151,7 +151,7 @@ class algorithm:
         ssd = self.chooseSSD()
         self.currBudget += int(ssd["price"])
 
-        ram = self.chooseSSD()
+        ram = self.chooseRam()
         self.currBudget += int(ram["price"])
 
 
