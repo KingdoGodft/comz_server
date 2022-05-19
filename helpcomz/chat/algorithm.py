@@ -126,20 +126,25 @@ class algorithm:
     def getPowerByTDP(self,tdp):
         temp = {}
         d = self.generateForm()
-        d["part_type"] = "case"
+        d["part_type"] = "powersupply"
 
-        pw = self.power.data[self.power.data["capacity"] >= tdp]
-        pw = pd.DataFrame(pw).sort_values(by="capacity",ascending=True).iloc[0:1] #파워 용량 가장 작은 것 선택!
+        pw = self.power.consumeRow(consume=False, consumeAll=True)
 
-        for col in pw:
-            temp[col] = pw[col]
+        minRow = None
+        mintdp = 9999
+        for row in pw:
+            if int(row["capacity"]) >= tdp:
+                if mintdp > int(row["capacity"]):
+                    minRow = row
 
-        d["price"] = int(temp["price"])
-        d["thumbnail"] = temp["thumbnail"]
-        d["part_name"] = temp["model"]
-        d["shop_link"] = temp["link"]
+        if minRow is None:
+            return None
 
-        print("DDDD",d)
+        d["price"] = int(minRow["price"])
+        d["thumbnail"] = minRow["thumbnail"]
+        d["part_name"] = minRow["model"]
+        d["shop_link"] = minRow["link"]
+
         return d
 
     def run(self, budget, games, option):
@@ -197,6 +202,9 @@ class algorithm:
                 needCapacity = int(currCpu["tdp"])+int(currGpu["tgp"])+150 #필요한 파워 용량 
 
                 currPw = self.getPowerByTDP(needCapacity)
+
+                if currPw is None: #만족하는 파워 용량이 없어서 None 리턴 
+                    return None
 
                 tempBudget = currCpu["price"]+currGpu["price"]+currMb["price"]+currPw["price"]
 
