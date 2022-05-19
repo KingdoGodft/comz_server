@@ -14,6 +14,7 @@ class algorithm:
     
 
     def __init__(self):
+        print(os.getcwd())
         self.cpu = CsvManager("helpcomz/resource/cpu.csv")
         self.gpu = CsvManager("helpcomz/resource/gpu.csv")
         self.case = CsvManager("helpcomz/resource/case.csv")
