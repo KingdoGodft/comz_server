@@ -124,6 +124,7 @@ class algorithm:
         return d
 
     def getPowerByTDP(self,tdp):
+        temp = {}
         d = self.generateForm()
         d["part_type"] = "case"
 
@@ -131,9 +132,12 @@ class algorithm:
         pw = pd.DataFrame(pw).sort_values(by="capacity",ascending=True).iloc[0:1] #파워 용량 가장 작은 것 선택!
 
         for col in pw:
-            d[col] = pw[col]
+            temp[col] = pw[col]
 
-        d["price"] = int(pw["price"])
+        d["price"] = int(temp["price"])
+        d["thumbnail"] = temp["thumbnail"]
+        d["part_name"] = temp["model"]
+        d["shop_link"] = temp["link"]
 
         print("DDDD",d)
         return d
