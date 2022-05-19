@@ -1,0 +1,11 @@
+model,price,link,thumbnail,score,core,thread,clock,turbo_clock
+Intel Core i9-12900,638120,http://prod.danawa.com/info/?pcode=16101545&keyword=i9+12900&cate=113973,http://img.danawa.com/prod_img/500000/545/101/img/16101545_1.jpg?shrink=130:130&_v=20220119175208,38803,16,24,2.4,5.1
+AMD Ryzen 7 5800X,313880,http://prod.danawa.com/info/?pcode=12836186&keyword=5800x&cate=113990,http://img.danawa.com/prod_img/500000/186/836/img/12836186_1.jpg?shrink=130:130&_v=20220224155434,28393,8,16,3.8,4.7
+Intel Core i7-12700K,531520,http://prod.danawa.com/info/?pcode=15594638&keyword=i7+12700k&cate=113973,http://img.danawa.com/prod_img/500000/638/594/img/15594638_1.jpg?shrink=130:130&_v=20220111160408,33961,12,20,3.6,5
+Intel Core i5-12600K,356400,http://prod.danawa.com/info/?pcode=15594263&keyword=i5+12600k&cate=113973,http://img.danawa.com/prod_img/500000/263/594/img/15594263_1.jpg?shrink=130:130&_v=20220111133249,27341,10,16,3.7,4.9
+Intel Core i5-12500,253610,http://prod.danawa.com/info/?pcode=16101398&keyword=i5+12500&cate=113973,http://img.danawa.com/prod_img/500000/398/101/img/16101398_1.jpg?shrink=130:130&_v=20220119173237,20369,6,12,3,4.6
+AMD Ryzen 5 5600X,211840,http://prod.danawa.com/info/?pcode=12625265&keyword=5600x&cate=113990,http://img.danawa.com/prod_img/500000/265/625/img/12625265_1.jpg?shrink=130:130&_v=20220414125229,22103,6,12,3.7,4.6
+Intel Core i5-12400F,214880,http://prod.danawa.com/info/?pcode=16101353&keyword=12400f&cate=113973,http://img.danawa.com/prod_img/500000/353/101/img/16101353_1.jpg?shrink=130:130&_v=20220119172937,19658,6,12,2.5,4.4
+AMD Ryzen5 PRO 4650G,156560,http://prod.danawa.com/info/?pcode=11876443&keyword=4650g&cate=113990,http://img.danawa.com/prod_img/500000/443/876/img/11876443_1.jpg?shrink=130:130&_v=20220224155534,16431,6,12,3.7,4.2
+Intel Core i3-12100F,115890,http://prod.danawa.com/info/?pcode=16101179&keyword=i3+12100f&cate=113973,http://img.danawa.com/prod_img/500000/179/101/img/16101179_1.jpg?shrink=130:130&_v=20220119172656,14566,4,8,3.3,4.3
+Intel Core i3-12100,158990,http://prod.danawa.com/info/?pcode=16101083&keyword=i3+12100&cate=113973,http://img.danawa.com/prod_img/500000/083/101/img/16101083_1.jpg?shrink=130:130&_v=20220119172820,14573,4,8,3.3,4.3
