@@ -63,14 +63,6 @@ class algorithm:
         #     }
 
 
-    def read_csv(name):
-        #일단 안씀 
-        f = open("../resource/"+name+".csv")
-        mycsv = csv.DictReader(f)
-        return mycsv
-
-
-
     def chooseSSD(self):
         ssdData = self.generateForm()
         ssdData["part_type"] = "disk"
