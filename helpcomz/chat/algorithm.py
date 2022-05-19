@@ -3,7 +3,7 @@ import sys
 import os
 
 import pandas as pd
-from csvManager import CsvManager
+from .csvManager import CsvManager
 from operator import itemgetter
 
 

@@ -12,7 +12,7 @@ from .models import UserID, Chat
 from .serializers import UserIDSerializer, ChatSerializer, PCPartsSerializer
 from rest_framework import status
 import string
-from algorithm import algorithm
+from .algorithm import algorithm
 
 
 
