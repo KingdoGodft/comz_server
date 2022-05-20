@@ -289,7 +289,7 @@ class algorithm:
         targetGame= self.gameMap[game]
 
         minFPS = 55
-        maxFPS = 150
+        maxFPS = 600
 
 
         if option != 0:
