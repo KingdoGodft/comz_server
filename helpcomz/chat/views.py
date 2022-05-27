@@ -89,38 +89,69 @@ class ChatView(APIView):
 
         # dialogflow로 답변 생성
         project_id = "comz-chat"
-        session_id = "user_id"
+        session_id = user_id
         
         dialogflow_response =  self.detect_intent_texts(project_id, session_id, [content], "ko-KR")
 
 
-        
         fulfillment_messages = dialogflow_response.query_result.fulfillment_messages
         is_finished = dialogflow_response.query_result.all_required_params_present
-        is_intent_ask_pc = dialogflow_response.query_result.intent.display_name == "ask_pc_game"
+        is_intent_ask_pc_games = dialogflow_response.query_result.intent.display_name == "ask_pc_game"
+        is_success_intent = dialogflow_response.query_result.intent.display_name == "ask_pc_game_success"
+        is_fail_intent = dialogflow_response.query_result.intent.display_name == "ask_pc_game_fail"
+        is_yes_intent = dialogflow_response.query_result.intent.display_name == "ask_pc_game_yes"
+        is_no_intent = dialogflow_response.query_result.intent.display_name == "ask_pc_game_no"
         output_contexts =  dialogflow_response.query_result.parameters
 
         # https://stackoverflow.com/questions/71256960/how-to-access-infos-in-protobuf-response-from-dialogflow-api
         # cannot extract parameters directly. convert it to json
         from google.protobuf.json_format import MessageToDict
         dialogflow_response_dict = MessageToDict(dialogflow_response._pb)
-        if is_intent_ask_pc:
+        if is_intent_ask_pc_games:
             parameters =  dialogflow_response_dict['queryResult']['parameters']
         else:
             parameters = {}
+
+        # 답변 개수
+        answer_count =  len(fulfillment_messages)
 
         # 리턴되는 메시지 리스트 각각에 대해 답변 생성
         for idx, text in enumerate(fulfillment_messages):
             answer_text = text.text.text[0]
             
             # 마지막 답변 (사용자에게 재시작을 묻는 경우) 확인
-            is_last_answer = is_finished and idx == len(fulfillment_messages) -1  and is_intent_ask_pc
+            is_last_answer = is_finished and idx == len(fulfillment_messages) -1  and is_intent_ask_pc_games
             
-            # 챗봇에서 모든 정보가 수집되었을 경우 마지막 답변 형식을 parts로 지정
+            # 답변 형식을 answer로 지정
             chat_type = "answer"
-            if is_last_answer:
-                chat_type = "parts"
+            self.save_answer(user_id, chat_type, answer_text, parameters)
 
+            # 모든 정보가 수집되었을 경우 PC 부품 리스트 생성 가능한지 체크
+            # intent: ask_pc_game
+            if is_last_answer:
+                pc_parts_info = self.create_parts(user_id, parameters)
+                if pc_parts_info:
+                    # 가능한 경우 diagflow에 메시지를 전달하여 intent를 ask_pc_game_success로 변경
+                    dialogflow_response_pc_possible =  self.detect_intent_texts(project_id, session_id, ['server:possible_spec'], "ko-KR")
+                    possible_fulfillment_text = dialogflow_response_pc_possible.query_result.fulfillment_text
+                    # 답변 형식을 parts로 지정하여 저장
+                    self.save_answer(user_id, "parts", possible_fulfillment_text, parameters)
+                    # 부품 정보 저장
+                    self.save_parts(pc_parts_info = pc_parts_info, chat_id=user_id)
+                else:
+                    # 불가능한 경우 diagflow에 메시지를 전달하여 intent를 ask_pc_game_fail로 변경
+                    dialogflow_response_pc_impossible =  self.detect_intent_texts(project_id, session_id, ['server:impossible_spec'], "ko-KR")
+                    impossible_fulfillment_text = dialogflow_response_pc_impossible.query_result.fulfillment_text
+                    # 답변 형식을 answer 지정하여 저장
+                    self.save_answer(user_id, "answer", impossible_fulfillment_text, parameters)
+                # 답변 개수 1 증가
+                answer_count += 1
+                    
+        # 총 답변 개수 리턴
+        return len(fulfillment_messages)
+
+
+    def save_answer(self, user_id, chat_type, answer_text, parameters):
             # 답변 생성
             response_data = {
                 "user_id": user_id,
@@ -136,13 +167,7 @@ class ChatView(APIView):
                 pass
             else:
                 print(response_chat_serializer.errors)
-
-            # 모든 정보가 수집되었을 경우 PC 부품 리스트 생성
-            if is_last_answer:
-                self.create_parts(response_chat_serializer.data, parameters )
         
-        # 총 답변 개수 리턴
-        return len(fulfillment_messages)
             
     """
     google cloud api for dialogflow 
@@ -187,9 +212,10 @@ class ChatView(APIView):
     parameter:
         data: ChatSerializer
     '''
-    def create_parts(self, chat_data, parameter):
+    def create_parts(self, chat_id, parameter):
+    #def create_parts(self, chat_data, parameter):
         # chat_data에서 chat_id 가져옴
-        chat_id = chat_data.get("id")
+        #chat_id = chat_data.get("id")
 
         alg = algorithm()
 
@@ -198,6 +224,8 @@ class ChatView(APIView):
         if computer is None:
 
             # 부품 더미데이터
+            pc_parts_info = []
+            '''
             pc_parts_info = [
                 {
                 "part_type" : "cpu",
@@ -249,6 +277,7 @@ class ChatView(APIView):
                 "thumbnail" : "http://img.danawa.com/prod_img/500000/840/705/img/14705840_1.jpg?shrink=130:130",
                 },
             ]
+            '''
         else:
             print("Computer is not None")
             print(computer["data"])
@@ -265,8 +294,15 @@ class ChatView(APIView):
 
             # for pc_part_info in pc_parts_info:
             #     pc_part_info['totalPrice']
-            
-        # PC 부품 정보 입력
+        return pc_parts_info
+
+    '''
+    insert parts to DB
+    parameter:
+        pc_parts_info: []
+    '''
+    def save_parts(self,pc_parts_info,chat_id):
+        # PC 부품 정보 저장
         for pc_part_info in pc_parts_info:
             pc_part_info['chat_id'] = chat_id
             pc_part_serializer = PCPartsSerializer(data = pc_part_info)
