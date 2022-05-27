@@ -96,7 +96,7 @@ class ChatView(APIView):
 
         fulfillment_messages = dialogflow_response.query_result.fulfillment_messages
         is_finished = dialogflow_response.query_result.all_required_params_present
-        is_intent_ask_pc_games = dialogflow_response.query_result.intent.display_name == "ask_pc_game"
+        is_intent_ask_pc_game = dialogflow_response.query_result.intent.display_name == "ask_pc_game"
         is_success_intent = dialogflow_response.query_result.intent.display_name == "ask_pc_game_success"
         is_fail_intent = dialogflow_response.query_result.intent.display_name == "ask_pc_game_fail"
         is_yes_intent = dialogflow_response.query_result.intent.display_name == "ask_pc_game_yes"
@@ -107,7 +107,7 @@ class ChatView(APIView):
         # cannot extract parameters directly. convert it to json
         from google.protobuf.json_format import MessageToDict
         dialogflow_response_dict = MessageToDict(dialogflow_response._pb)
-        if is_intent_ask_pc_games:
+        if is_intent_ask_pc_game:
             parameters =  dialogflow_response_dict['queryResult']['parameters']
         else:
             parameters = {}
@@ -120,7 +120,7 @@ class ChatView(APIView):
             answer_text = text.text.text[0]
             
             # 마지막 답변 (사용자에게 재시작을 묻는 경우) 확인
-            is_last_answer = is_finished and idx == len(fulfillment_messages) -1  and is_intent_ask_pc_games
+            is_last_answer = is_finished and idx == len(fulfillment_messages) -1  and is_intent_ask_pc_game
             
             # 답변 형식을 answer로 지정
             chat_type = "answer"
@@ -135,38 +135,41 @@ class ChatView(APIView):
                     dialogflow_response_pc_possible =  self.detect_intent_texts(project_id, session_id, ['server:possible_spec'], "ko-KR")
                     possible_fulfillment_text = dialogflow_response_pc_possible.query_result.fulfillment_text
                     # 답변 형식을 parts로 지정하여 저장
-                    self.save_answer(user_id, "parts", possible_fulfillment_text, parameters)
+                    chat_data = self.save_answer(user_id, "parts", possible_fulfillment_text, parameters)
                     # 부품 정보 저장
-                    self.save_parts(pc_parts_info = pc_parts_info, chat_id=user_id)
+                    self.save_parts(pc_parts_info = pc_parts_info, chat_id=chat_data.get("id"))
                 else:
                     # 불가능한 경우 diagflow에 메시지를 전달하여 intent를 ask_pc_game_fail로 변경
                     dialogflow_response_pc_impossible =  self.detect_intent_texts(project_id, session_id, ['server:impossible_spec'], "ko-KR")
                     impossible_fulfillment_text = dialogflow_response_pc_impossible.query_result.fulfillment_text
                     # 답변 형식을 answer 지정하여 저장
                     self.save_answer(user_id, "answer", impossible_fulfillment_text, parameters)
+                    # 불가능한 경우 견적 완성 메시지를 전송하지 않아야 하기 때문에 답변 개수를 감소시킴.
+                    answer_count -= 2
                 # 답변 개수 1 증가
                 answer_count += 1
                     
         # 총 답변 개수 리턴
-        return len(fulfillment_messages)
+        return answer_count
 
 
     def save_answer(self, user_id, chat_type, answer_text, parameters):
-            # 답변 생성
-            response_data = {
-                "user_id": user_id,
-                "chat_type":chat_type,
-                "content" : answer_text,
-                "parameters" : parameters
-            }
+        # 답변 생성
+        response_data = {
+            "user_id": user_id,
+            "chat_type":chat_type,
+            "content" : answer_text,
+            "parameters" : parameters
+        }
 
-            # 답변 저장
-            response_chat_serializer = ChatSerializer(data = response_data)
-            if response_chat_serializer.is_valid():
-                response_chat_serializer.save() 
-                pass
-            else:
-                print(response_chat_serializer.errors)
+        # 답변 저장
+        response_chat_serializer = ChatSerializer(data = response_data)
+        if response_chat_serializer.is_valid():
+            response_chat_serializer.save() 
+            pass
+        else:
+            print(response_chat_serializer.errors)
+        return response_chat_serializer.data
         
             
     """
