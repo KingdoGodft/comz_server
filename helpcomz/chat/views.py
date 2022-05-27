@@ -83,6 +83,7 @@ class ChatView(APIView):
         data: ChatSerializer
     """
     def create_answer(self, chat_data):
+
         # chat_data에서 user_id 가져옴
         user_id = chat_data.get("user_id")
         content = chat_data.get("content")
@@ -126,6 +127,8 @@ class ChatView(APIView):
             chat_type = "answer"
             self.save_answer(user_id, chat_type, answer_text, parameters)
 
+            print(parameters)
+
             # 모든 정보가 수집되었을 경우 PC 부품 리스트 생성 가능한지 체크
             # intent: ask_pc_game
             if is_last_answer:
@@ -142,8 +145,8 @@ class ChatView(APIView):
                     # 불가능한 경우 diagflow에 메시지를 전달하여 intent를 ask_pc_game_fail로 변경
                     dialogflow_response_pc_impossible =  self.detect_intent_texts(project_id, session_id, ['server:impossible_spec'], "ko-KR")
                     impossible_fulfillment_text = dialogflow_response_pc_impossible.query_result.fulfillment_text
-                    # 답변 형식을 answer 지정하여 저장
-                    self.save_answer(user_id, "answer", impossible_fulfillment_text, parameters)
+                    # 답변 형식을 answer 지정하여 저장, empty paramteres 지정
+                    self.save_answer(user_id, "answer", impossible_fulfillment_text, {})
                     # 불가능한 경우 견적 완성 메시지를 전송하지 않아야 하기 때문에 답변 개수를 감소시킴.
                     answer_count -= 2
                 # 답변 개수 1 증가
