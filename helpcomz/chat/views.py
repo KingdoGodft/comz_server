@@ -127,20 +127,21 @@ class ChatView(APIView):
             chat_type = "answer"
             self.save_answer(user_id, chat_type, answer_text, parameters)
 
-            print(parameters)
 
             # 모든 정보가 수집되었을 경우 PC 부품 리스트 생성 가능한지 체크
             # intent: ask_pc_game
             if is_last_answer:
-                pc_parts_info = self.create_parts(user_id, parameters)
-                if pc_parts_info:
+                computer_info = self.create_parts(user_id, parameters)
+                if computer_info:
                     # 가능한 경우 diagflow에 메시지를 전달하여 intent를 ask_pc_game_success로 변경
                     dialogflow_response_pc_possible =  self.detect_intent_texts(project_id, session_id, ['server:possible_spec'], "ko-KR")
                     possible_fulfillment_text = dialogflow_response_pc_possible.query_result.fulfillment_text
                     # 답변 형식을 parts로 지정하여 저장
+                    # 답변에 FPS 정보 추가
+                    possible_fulfillment_text += f" 예상 fps는 {computer_info['frame']} 입니다."
                     chat_data = self.save_answer(user_id, "parts", possible_fulfillment_text, parameters)
                     # 부품 정보 저장
-                    self.save_parts(pc_parts_info = pc_parts_info, chat_id=chat_data.get("id"))
+                    self.save_parts(pc_parts_info = computer_info['data'], chat_id=chat_data.get("id"))
                 else:
                     # 불가능한 경우 diagflow에 메시지를 전달하여 intent를 ask_pc_game_fail로 변경
                     dialogflow_response_pc_impossible =  self.detect_intent_texts(project_id, session_id, ['server:impossible_spec'], "ko-KR")
@@ -288,7 +289,8 @@ class ChatView(APIView):
             print("Computer is not None")
             print(computer["data"])
             print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-            pc_parts_info = computer["data"]
+            # pc_parts_info = computer["data"]
+            pc_parts_info = computer
 
             #computer에 들어가는 데이터는 아래처럼 생겨먹음 
                 #     return {

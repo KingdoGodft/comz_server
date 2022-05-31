@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*- 
 import sys
 import os
+from tkinter.messagebox import NO
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 import pandas as pd
@@ -223,14 +224,31 @@ class algorithm:
                 candidate["pw"] = currPw
                 candidate["frame"] = frame
                 candidate["budget"] = tempBudget
+                candidate["game"] = game
 
                 candidateList.append(candidate)
 
         if len(candidateList) <= 0:
             return None
 
+
+        games_pc = []
+        # 각 게임별 필터링한 후 각각의 게임에서 최대 FPS를 만드는 PC끼리 비교
+        for game in games:
+            # 각 게임별 분류
+            pc_of_game = list(filter(lambda candidate: candidate["game"] == game, candidateList))
+            # 만약 1개의 게임이라도 만족시킬 수 없다면 불가능한 견적이라고 판단
+            if not pc_of_game:
+                return None
+            # 각 게임별 최대 FPS를 만드는 PC 
+            max_fps_pc = sorted(pc_of_game, key=itemgetter("frame"),reverse=True)[0]
+            games_pc.append(max_fps_pc)
+        # 각 게임별 필터링 후 FPS를 비교함=> 각 게임별 최대값끼리 비교하여 최소 FPS를 가져옴
+        selected = sorted(games_pc, key=itemgetter("frame"),reverse=True)[-1]
+
         # selected = sorted(candidateList, key=itemgetter("budget"))[0] # 가격 낮은거부터 정렬 
-        selected = sorted(candidateList, key=itemgetter("frame"),reverse=True)[0] # 프레임 높은거부터 정렬 
+        #selected = sorted(candidateList, key=itemgetter("frame"),reverse=True)[0] # 프레임 높은거부터 정렬
+
 
         temp_cpu = self.generateForm()
         temp_cpu["part_type"] = "cpu"
@@ -261,7 +279,7 @@ class algorithm:
         self.returnData.append(case)
 
         self.currBudget += selected["budget"]
-
+        
         return {
                    "data" : self.returnData,
                    "option" : option,
