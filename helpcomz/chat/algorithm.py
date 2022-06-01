@@ -149,7 +149,7 @@ class algorithm:
 
         return d
 
-    def run(self, budget, games, option):
+    def run(self, budget, games, option, resolution, refresh_rate, preference):
         #None 리턴하면 계산하다가 에러 난 것!
 
         # budget = budget[0]
@@ -177,16 +177,12 @@ class algorithm:
         candidateList = []
 
         for game in games:
-            cpugpuList = self.getProperCpuGpuList(game, option)
+            cpugpuList = self.getProperCpuGpuList(game, option, resolution, refresh_rate)
 
             if len(cpugpuList) <= 0:
                 return None
 
             # for candidate in candidateList:
-            #     #이미 이전 게임에서 선택된 후보를 다시 체크해야됌!
-            #todo 게임 여러개일때 ... 어떡해야될지 모르겠네 ㅅㅂ 
-
-
             for idx, cpugpu in cpugpuList.iterrows():
                 cpu=cpugpu["CPU NAME"]
                 gpu=cpugpu["GPU NAME"]
@@ -246,8 +242,10 @@ class algorithm:
         # 각 게임별 필터링 후 FPS를 비교함=> 각 게임별 최대값끼리 비교하여 최소 FPS를 가져옴
         selected = sorted(games_pc, key=itemgetter("frame"),reverse=True)[-1]
 
-        # selected = sorted(candidateList, key=itemgetter("budget"))[0] # 가격 낮은거부터 정렬 
-        #selected = sorted(candidateList, key=itemgetter("frame"),reverse=True)[0] # 프레임 높은거부터 정렬
+        if preference == "가성비":
+            selected = sorted(candidateList, key=itemgetter("budget"))[0] # 가격 낮은 순서로 정렬 
+        else:
+            selected = sorted(candidateList, key=itemgetter("frame"),reverse=True)[0] # 프레임 높은 순서로 정렬
 
 
         temp_cpu = self.generateForm()
@@ -291,7 +289,7 @@ class algorithm:
 
 
 
-    def getProperCpuGpuList(self, game, option):
+    def getProperCpuGpuList(self, game, option, resolution, refresh_rate):
         if option=="상관없음":
             option = 0
         if option=="하옵":
@@ -306,8 +304,20 @@ class algorithm:
         #       3 => 롤
         targetGame= self.gameMap[game]
 
+
         minFPS = 55
         maxFPS = 600
+        # 모니터 주사율에 따라 최소 FPS 선택
+        # 144hz를 다 쓰지는 못해도 100프레임정도는 나와야 하지 않을까...?
+        # refresh_rate는 dialogflow의 pc_monitor_refresh_rate entity 참고
+        if refresh_rate == "144hz":
+            minFPS = 100
+
+        # 모니터 해상도 선택
+        # FHD, QHD (대문자)
+        # 상관없다로 선택된 경우 FHD로 고정
+        if resolution == "상관없다":
+            resolution = "FHD"
 
 
         if option != 0:
@@ -319,6 +329,8 @@ class algorithm:
 
         temp_data = temp_data[temp_data["GAME AVG FRAME"] >= minFPS]
         temp_data = temp_data[temp_data["GAME AVG FRAME"] <= maxFPS]
+
+        temp_data = temp_data[temp_data["RESOLUTION"] == resolution]
 
         # returnList = (temp_data["CPU NAME"], temp_data["GPU NAME"])
 

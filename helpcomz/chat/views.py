@@ -224,9 +224,13 @@ class ChatView(APIView):
         # chat_data에서 chat_id 가져옴
         #chat_id = chat_data.get("id")
 
+        print(parameter)
+
         alg = algorithm()
 
-        computer = alg.run(parameter["pc_budget"],parameter["pc_games"],parameter["pc_game_quality"])
+        computer = alg.run(parameter["pc_budget"],parameter["pc_games"], \
+            parameter["pc_game_quality"], parameter["pc_monitor_resolution"], parameter["pc_monitor_refresh_rate"], \
+                parameter["pc_preference"])
 
         if computer is None:
 
