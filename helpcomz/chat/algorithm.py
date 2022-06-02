@@ -229,11 +229,13 @@ class algorithm:
 
 
         games_pc = []
+        '''
         # 각 게임별 필터링한 후 각각의 게임에서 최대 FPS를 만드는 PC끼리 비교
         for game in games:
             # 각 게임별 분류
             pc_of_game = list(filter(lambda candidate: candidate["game"] == game, candidateList))
             # 만약 1개의 게임이라도 만족시킬 수 없다면 불가능한 견적이라고 판단
+            print(pc_of_game)
             if not pc_of_game:
                 return None
             # 각 게임별 최대 FPS를 만드는 PC 
@@ -246,7 +248,37 @@ class algorithm:
             selected = sorted(candidateList, key=itemgetter("budget"))[0] # 가격 낮은 순서로 정렬 
         else:
             selected = sorted(candidateList, key=itemgetter("frame"),reverse=True)[0] # 프레임 높은 순서로 정렬
+        '''
 
+        selected = None
+
+        if preference == "가성비":  # 가격 우선
+            # 각 게임별 필터링한 후 각각의 게임에서 최소 가격을 비교
+            for game in games:
+                # 각 게임별 분류
+                pc_of_game = list(filter(lambda candidate: candidate["game"] == game, candidateList))
+                # 만약 1개의 게임이라도 만족시킬 수 없다면 불가능한 견적이라고 판단
+                if not pc_of_game:
+                    return None
+                # 각 게임별 최소 가격의 PC
+                min_cost_pc = sorted(pc_of_game, key=itemgetter("budget"),reverse=False)[0]
+                games_pc.append(min_cost_pc)
+            # 각 게임별 필터링 후 FPS를 비교함=> 각 게임별 최대값끼리 비교하여 최소 FPS(높은 사양의 게임)를 가져옴
+            selected = sorted(games_pc, key=itemgetter("frame"),reverse=False)[0]
+
+        else:       # 성능 우선
+            # 각 게임별 필터링한 후 각각의 게임에서 최대 FPS를 만드는 PC끼리 비교
+            for game in games:
+                # 각 게임별 분류
+                pc_of_game = list(filter(lambda candidate: candidate["game"] == game, candidateList))
+                # 만약 1개의 게임이라도 만족시킬 수 없다면 불가능한 견적이라고 판단
+                if not pc_of_game:
+                    return None
+                # 각 게임별 최대 FPS를 만드는 PC 
+                max_fps_pc = sorted(pc_of_game, key=itemgetter("frame"),reverse=False)[-1]
+                games_pc.append(max_fps_pc)
+            # 각 게임별 필터링 후 FPS를 비교함=> 각 게임별 최대값끼리 비교하여 최소 FPS(높은 사양의 게임)를 가져옴
+            selected = sorted(games_pc, key=itemgetter("frame"),reverse=False)[0]
 
         temp_cpu = self.generateForm()
         temp_cpu["part_type"] = "cpu"
